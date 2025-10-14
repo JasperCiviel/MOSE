@@ -13,16 +13,26 @@ Use one of these approaches to grab **all** of the source files (there are more 
 
 Avoid copying individual files through the browser interface—GitHub will refuse large batches and show errors such as “Binary files are not supported.” Cloning or downloading the archive ensures every asset (images, GeoJSON, config, etc.) arrives exactly where the app expects it.
 
-```bash
-pnpm install # or npm install
-pnpm dev     # runs on http://localhost:3001
-```
+### Running the site locally (after downloading the ZIP)
 
-Additional scripts:
+1. Ensure you have **Node.js 18 or newer** installed. If you do not already have a package manager, the stock `npm` that ships with Node works perfectly—`pnpm` is optional.
+2. Unzip the archive you downloaded from GitHub and open a terminal in the extracted project folder (the one that contains `package.json`).
+3. Install dependencies and start the dev server:
 
-- `pnpm build` — build for production
-- `pnpm start` — serve production build
-- `pnpm test` — run the vitest suite (PCHIP interpolation)
+   ```bash
+   npm install      # installs dependencies declared in package.json
+   npm run dev      # launches Next.js on http://localhost:3001
+   ```
+
+   > Prefer `pnpm`? Replace the commands above with `pnpm install` and `pnpm dev`.
+
+4. Visit **http://localhost:3001** in your browser to explore the MOSE app. Whenever you edit files the page reloads automatically.
+
+When you are ready to create an optimized build or run the interpolation unit tests, use these scripts (swap `npm run` with `pnpm` if you prefer pnpm):
+
+- `npm run build` — build for production
+- `npm run start` — serve the production build
+- `npm run test` — run the Vitest suite (PCHIP interpolation)
 
 ## Project Structure
 
