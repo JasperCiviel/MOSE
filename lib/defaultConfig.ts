@@ -1,0 +1,48 @@
+export const defaultConfig = {
+  constants: { TOTAL_LENGTH: 12000, MIN_CLOSING_TIME: 0.1 },
+  bounds: {
+    x1: { min: 100, max: 5000, step: 10, unit: 'm' },
+    x2: { min: 0.5, max: 3.0, step: 0.05, unit: '-' },
+    x3: { min: 0.1, max: 6.0, step: 0.05, unit: 'h' }
+  },
+  OBJECTIVE_KEYS: ['initial_cost', 'maintenance_cost', 'sight', 'accessibility', 'water_quality', 'overtopping_risk'],
+  STAKEHOLDER_DATA: [
+    {
+      name: 'Residents',
+      influence: 0.3,
+      weights: { initial_cost: 0.1, maintenance_cost: 0.1, sight: 0.2, accessibility: 0.2, water_quality: 0.3, overtopping_risk: 0.1 }
+    },
+    {
+      name: 'Local Government',
+      influence: 0.25,
+      weights: { initial_cost: 0.25, maintenance_cost: 0.25, sight: 0.1, accessibility: 0.15, water_quality: 0.1, overtopping_risk: 0.15 }
+    },
+    {
+      name: 'Shipping',
+      influence: 0.2,
+      weights: { initial_cost: 0.1, maintenance_cost: 0.1, sight: 0.05, accessibility: 0.45, water_quality: 0.05, overtopping_risk: 0.25 }
+    },
+    {
+      name: 'Environmental NGO',
+      influence: 0.15,
+      weights: { initial_cost: 0.05, maintenance_cost: 0.05, sight: 0.1, accessibility: 0.05, water_quality: 0.55, overtopping_risk: 0.2 }
+    },
+    {
+      name: 'Tourism',
+      influence: 0.1,
+      weights: { initial_cost: 0.05, maintenance_cost: 0.05, sight: 0.35, accessibility: 0.25, water_quality: 0.2, overtopping_risk: 0.1 }
+    }
+  ],
+  knots: {
+    initial_cost: { x: [100, 1000, 2500, 5000], y: [100, 60, 30, 0] },
+    maintenance_cost: { x: [0.5, 1.5, 2.5, 3.0], y: [100, 70, 30, 0] },
+    sight: { x: [0.5, 1.0, 2.0, 3.0], y: [20, 60, 85, 90] },
+    accessibility: { x: [0.1, 1.0, 3.0, 6.0], y: [90, 80, 40, 20] },
+    water_quality: { x: [100, 1000, 2500, 5000], y: [40, 60, 80, 90] },
+    overtopping_risk: { x: [0.1, 0.5, 1.5, 3.0], y: [100, 90, 40, 10] }
+  },
+  options: { popSize: 100, iterations: 200, crossover: 0.8, stallLimit: 30, encoding: 'real' },
+  paradigms: ['minmax', 'tetra']
+} as const;
+
+export type ModelConfig = typeof defaultConfig;

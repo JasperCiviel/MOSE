@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  @apply bg-lagoon-50 text-slate-900 antialiased;
+}
+
+a {
+  @apply text-lagoon-600 hover:text-lagoon-700;
+}
+
+.card {
+  @apply rounded-2xl bg-white shadow-soft border border-slate-100;
+}
+
+.section-title {
+  @apply text-2xl font-semibold text-slate-800 mb-4;
+}
+
+.section-subtitle {
+  @apply text-sm text-slate-500 mb-6;
+}
