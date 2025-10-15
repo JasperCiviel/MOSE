@@ -67,10 +67,39 @@ export default function StakeholdersPage() {
       <header className="space-y-4">
         <h1 className="text-4xl font-semibold text-slate-800">Stakeholders & MCDA</h1>
         <p className="max-w-3xl text-sm text-slate-600">
-          Update the influence of key groups and rebalance the objective weights they champion. Changes reflow into all
-          metrics, preference curves, and optimization runs so the class can compare perspectives transparently.
+          Four communities shape MOSE: the Municipality, Venice’s residents, environmental agencies, and the shipping
+          sector. Their priorities often pull in different directions—safety versus cost, ecology versus navigation—so we
+          quantify preferences before blending them in the MCDA analysis.
         </p>
       </header>
+
+      <section className="grid gap-6 md:grid-cols-2">
+        {[{
+          name: 'Municipality (Local Government)',
+          summary:
+            'Charged with safeguarding the city and defending multi-billion-euro investment. Needs MOSE to stop floods while withstanding public scrutiny over delays and corruption scandals.'
+        },
+        {
+          name: 'Residents of Venice',
+          summary:
+            'Depend on reliable protection to keep homes, schools, and workplaces dry. Welcome safety gains but remain wary of disruption, noise, and the taxes required to fund operations.'
+        },
+        {
+          name: 'Environmental Agencies & NGOs',
+          summary:
+            'Guard the lagoon’s fragile ecosystem. Fear prolonged closures will stagnate water, alter sediment transport, or harm wildlife, and advocate for mitigation or alternative solutions.'
+        },
+        {
+          name: 'Shipping Companies & Port Operators',
+          summary:
+            'Require open inlets to keep trade and ferries moving. Each closure halts vessels, so they push for short activation windows and wide navigation channels even during storms.'
+        }].map((item) => (
+          <article key={item.name} className="card p-6 space-y-3">
+            <h2 className="text-xl font-semibold text-slate-800">{item.name}</h2>
+            <p className="text-sm text-slate-600">{item.summary}</p>
+          </article>
+        ))}
+      </section>
 
       <section className="card p-6">
         <h2 className="section-title">Influence Weights</h2>

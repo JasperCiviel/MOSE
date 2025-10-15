@@ -6,23 +6,62 @@ import { defaultConfig } from '@/lib/defaultConfig';
 
 const { bounds, constants } = defaultConfig;
 
+const metricCopy: Record<string, { label: string; unit?: string; hint: string }> = {
+  initial_cost: {
+    label: 'Initial Construction Cost',
+    unit: 'M€',
+    hint: 'Upfront capital required to fabricate caissons, gates, and control systems.'
+  },
+  maintenance_cost: {
+    label: 'Annual Maintenance Cost',
+    unit: 'M€ / yr',
+    hint: 'Lifecycle servicing effort including corrosion protection and hydraulic upkeep.'
+  },
+  sight: {
+    label: 'Sight / Visual Impact',
+    hint: 'Higher values mean the lagoon skyline remains largely unobstructed.'
+  },
+  accessibility: {
+    label: 'Accessibility for Vessels',
+    hint: 'Scores above 7 indicate short closures and generous navigation channels.'
+  },
+  water_quality: {
+    label: 'Water Quality (Tidal Exchange)',
+    hint: 'Captures how well tides can refresh the lagoon despite barrier operation.'
+  },
+  overtopping_risk: {
+    label: 'Residual Overtopping Risk',
+    unit: '%',
+    hint: 'Lower values mean the barrier comfortably clears projected storm surges.'
+  }
+};
+
 function explanation(x1: number, x2: number, x3: number) {
   const parts: string[] = [];
-  if (x1 > (bounds.x1.min + bounds.x1.max) / 2) {
-    parts.push('Longer barriers improve coverage but drive initial cost upward.');
+  if (x1 > 1200) {
+    parts.push('Most of the 1.6 km inlet is now movable gates, maximising flexibility but demanding costly fabrication.');
+  } else if (x1 < 400) {
+    parts.push('With few movable modules the barrier acts more like a wall, lowering cost yet constraining vessels.');
   } else {
-    parts.push('Shorter barrier length trims capital cost yet may leave the lagoon exposed.');
+    parts.push('A mixed fixed / movable layout keeps capital moderate while still giving pilots gate lanes.');
   }
-  if (x2 > (bounds.x2.min + bounds.x2.max) / 2) {
-    parts.push('Taller gates bolster overtopping protection and help residents feel secure.');
+
+  if (x2 >= 8) {
+    parts.push('Towering gates crush overtopping risk but begin to intrude on the lagoon skyline.');
+  } else if (x2 <= 4) {
+    parts.push('Compact gate heights respect Venice’s horizon yet leave less surge freeboard.');
   } else {
-    parts.push('Lower gate profiles preserve views but increase overtopping risk.');
+    parts.push('Mid-height gates balance flood safety with a discreet profile.');
   }
-  if (x3 < 1.5) {
-    parts.push('Rapid opening times reduce flood exposure but increase mechanical stress and maintenance.');
+
+  if (x3 <= 1) {
+    parts.push('Keeping closures under an hour pleases shippers but requires premium actuators and crews.');
+  } else if (x3 >= 4) {
+    parts.push('Multi-hour closures simplify operations but slow tidal flushing and port access.');
   } else {
-    parts.push('Slower openings ease mechanical loads and shipping coordination, yet risk missing surprise surges.');
+    parts.push('A moderate closure window coordinates safety, ecology, and traffic.');
   }
+
   return parts.join(' ');
 }
 
@@ -43,8 +82,8 @@ export default function DesignPage() {
       <header className="space-y-4">
         <h1 className="text-4xl font-semibold text-slate-800">Design & Feasibility</h1>
         <p className="max-w-3xl text-sm text-slate-600">
-          Explore how barrier length (x1), gate height (x2), and opening time (x3) shape the MOSE system&apos;s metrics.
-          Move the sliders to see immediate feedback across cost, accessibility, water quality, and risk preferences.
+          Explore how movable gate length (x1), gate crest elevation (x2), and closure duration (x3) shape the MOSE
+          system&apos;s performance. The sliders mirror the remaining degrees of freedom discussed in studio.
         </p>
       </header>
 
@@ -52,8 +91,8 @@ export default function DesignPage() {
         <h2 className="section-title">Design Controls</h2>
         <div className="space-y-8">
           <div>
-            <label className="block text-sm font-medium text-slate-700">Barrier Length x1 ({bounds.x1.unit})</label>
-            <p className="text-xs text-slate-500">Longer barriers close more lagoon entrances but increase fabrication cost.</p>
+            <label className="block text-sm font-medium text-slate-700">Movable Gate Length x1 ({bounds.x1.unit})</label>
+            <p className="text-xs text-slate-500">Drag to adjust how much of the 1.6 km inlet can rise on demand.</p>
             <input
               type="range"
               min={bounds.x1.min}
@@ -66,8 +105,8 @@ export default function DesignPage() {
             <p className="mt-2 text-sm text-slate-700">Current: {design.x1.toFixed(0)} {bounds.x1.unit}</p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">Barrier Height x2 ({bounds.x2.unit})</label>
-            <p className="text-xs text-slate-500">Taller gates resist storm surge but change the skyline and require more energy.</p>
+            <label className="block text-sm font-medium text-slate-700">Gate Height x2 ({bounds.x2.unit})</label>
+            <p className="text-xs text-slate-500">Set the crest above mean sea level to manage overtopping headroom.</p>
             <input
               type="range"
               min={bounds.x2.min}
@@ -80,8 +119,8 @@ export default function DesignPage() {
             <p className="mt-2 text-sm text-slate-700">Current: {design.x2.toFixed(2)} {bounds.x2.unit}</p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">Opening Time x3 ({bounds.x3.unit})</label>
-            <p className="text-xs text-slate-500">Faster openings reduce flood exposure but can disrupt vessels and raise maintenance.</p>
+            <label className="block text-sm font-medium text-slate-700">Closure Duration x3 ({bounds.x3.unit})</label>
+            <p className="text-xs text-slate-500">Short closures favour shipping and ecology but strain mechanical systems.</p>
             <input
               type="range"
               min={bounds.x3.min}
@@ -125,15 +164,23 @@ export default function DesignPage() {
       <section className="card p-6">
         <h2 className="section-title">Metric Feedback</h2>
         <div className="grid gap-4 md:grid-cols-2">
-          {Object.entries(metrics).map(([key, value]) => (
-            <div key={key} className="rounded-2xl border border-slate-100 p-4">
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-semibold text-slate-700">{key.replace('_', ' ')}</p>
-                <span className="text-xs text-slate-500">Preference: {preferences[key as keyof typeof preferences]} / 100</span>
+          {Object.entries(metrics).map(([key, value]) => {
+            const meta = metricCopy[key] ?? { label: key.replace('_', ' '), hint: '' };
+            return (
+              <div key={key} className="rounded-2xl border border-slate-100 p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold text-slate-700">{meta.label}</p>
+                    {meta.hint ? <p className="text-xs text-slate-500">{meta.hint}</p> : null}
+                  </div>
+                  <span className="text-xs text-slate-500">Preference: {preferences[key as keyof typeof preferences]} / 100</span>
+                </div>
+                <p className="mt-3 text-2xl font-semibold text-slate-800">
+                  {value.toFixed(key === 'overtopping_risk' ? 1 : 2)} {meta.unit ?? ''}
+                </p>
               </div>
-              <p className="mt-3 text-2xl font-semibold text-slate-800">{value.toFixed(2)}</p>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
     </div>

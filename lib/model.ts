@@ -30,15 +30,6 @@ export const defaultScenario: ScenarioSettings = {
   maintenanceBudget: 1
 };
 
-export const coeffs = {
-  initial_cost: { base: 180, perMeter: 0.95, heightFactor: 150, timeFactor: 40 },
-  maintenance_cost: { base: 0.45, lengthFactor: 0.0006, heightFactor: 0.5, timeFactor: 0.08 },
-  sight: { base: 1.2, heightFactor: 0.22, lengthPenalty: 0.018, timePenalty: 0.04 },
-  accessibility: { base: 0.4, timeFactor: 0.9, heightPenalty: 0.15 },
-  water_quality: { base: 220, lengthFactor: 0.5, heightPenalty: 30, timeBenefit: 25 },
-  overtopping_risk: { base: 0.22, heightExponent: 1.4, timeRelief: 3.0 }
-};
-
 export const objectiveColors: Record<ObjectiveKey, string> = {
   initial_cost: '#0f60db',
   maintenance_cost: '#1f7dff',
@@ -62,7 +53,8 @@ export function clampToObjective(key: ObjectiveKey, value: number) {
 
 export function computeMetrics(design: DesignVector, scenario: ScenarioSettings = defaultScenario): Metrics {
   const { constants } = defaultConfig;
-  const lengthRatio = design.x1 / constants.TOTAL_LENGTH;
+  const lengthRatio = constants.TOTAL_LENGTH === 0 ? 0 : design.x1 / constants.TOTAL_LENGTH;
+  const closure = Math.max(design.x3, constants.MIN_CLOSING_TIME);
   const seaPressure = 1 + scenario.seaLevelRise * 0.4;
   const stormFactor = scenario.storminess;
   const maintenanceFactor = scenario.maintenanceBudget;
@@ -70,45 +62,40 @@ export function computeMetrics(design: DesignVector, scenario: ScenarioSettings 
   const metrics: Metrics = {
     initial_cost: clampToObjective(
       'initial_cost',
-      coeffs.initial_cost.base +
-        coeffs.initial_cost.perMeter * design.x1 * seaPressure +
-        coeffs.initial_cost.heightFactor * Math.pow(design.x2, 1.6) +
-        coeffs.initial_cost.timeFactor * Math.pow(Math.max(design.x3, constants.MIN_CLOSING_TIME), 1.2)
+      650 +
+        0.75 * design.x1 * seaPressure +
+        28 * Math.pow(design.x2, 1.6) +
+        220 / closure
     ),
     maintenance_cost: clampToObjective(
       'maintenance_cost',
-      (coeffs.maintenance_cost.base +
-        coeffs.maintenance_cost.lengthFactor * design.x1 * stormFactor +
-        coeffs.maintenance_cost.heightFactor * Math.pow(design.x2, 1.4) +
-        coeffs.maintenance_cost.timeFactor * Math.pow(design.x3, 1.15)) /
-        Math.max(maintenanceFactor, 0.2)
+      (22 + 0.02 * design.x1 * stormFactor + 2.8 * Math.pow(design.x2, 1.4) + 55 / closure) /
+        Math.max(maintenanceFactor, 0.4)
     ),
     sight: clampToObjective(
       'sight',
-      coeffs.sight.base +
-        coeffs.sight.heightFactor * Math.pow(design.x2, 0.9) -
-        coeffs.sight.lengthPenalty * Math.pow(lengthRatio, 1.1) -
-        coeffs.sight.timePenalty * Math.pow(design.x3, 0.7)
+      3.2 +
+        6.3 * Math.min(Math.max(lengthRatio, 0), 1) -
+        0.3 * (design.x2 - 1) -
+        0.35 * Math.max(closure - 1.5, 0)
     ),
     accessibility: clampToObjective(
       'accessibility',
-      coeffs.accessibility.base +
-        coeffs.accessibility.timeFactor * Math.pow(design.x3, 0.85) -
-        coeffs.accessibility.heightPenalty * Math.pow(design.x2, 1.1)
+      4.2 +
+        5.4 * Math.min(Math.max(lengthRatio, 0), 1) -
+        1.6 * (closure - 0.5) -
+        0.25 * (design.x2 - 1)
     ),
     water_quality: clampToObjective(
       'water_quality',
-      coeffs.water_quality.base +
-        coeffs.water_quality.lengthFactor * design.x1 * seaPressure -
-        coeffs.water_quality.heightPenalty * Math.pow(design.x2, 1.35) +
-        coeffs.water_quality.timeBenefit * Math.pow(design.x3, 1.1)
+      5.1 +
+        3.4 * Math.min(Math.max(lengthRatio, 0), 1) -
+        2.0 * (closure - 0.5) -
+        0.12 * Math.max(design.x2 - 5, 0)
     ),
     overtopping_risk: clampToObjective(
       'overtopping_risk',
-      coeffs.overtopping_risk.base +
-        2.2 / Math.pow(Math.max(design.x2, 0.1), coeffs.overtopping_risk.heightExponent) * stormFactor +
-        coeffs.overtopping_risk.timeRelief /
-          Math.pow(Math.max(design.x3, constants.MIN_CLOSING_TIME), 1.3)
+      Math.max(0, (5 + 80 * Math.exp(-0.45 * design.x2) - 1.4 * (closure - 0.5)) * stormFactor)
     )
   };
 
