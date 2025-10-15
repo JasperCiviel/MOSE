@@ -5,15 +5,15 @@ import { usePathname } from 'next/navigation';
 import { useMemo } from 'react';
 
 const navItems = [
-  { href: '/', label: 'Home' },
-  { href: '/steps', label: 'Project Steps' },
+  { href: '/', label: 'Introduction' },
   { href: '/stakeholders', label: 'Stakeholders' },
-  { href: '/design', label: 'Design' },
-  { href: '/metrics', label: 'Metrics' },
+  { href: '/metrics', label: 'Tetra Analysis' },
+  { href: '/design', label: 'Design Model' },
   { href: '/opt', label: 'Optimization' },
-  { href: '/scenarios', label: 'Scenarios' },
   { href: '/ethics', label: 'Ethics' },
   { href: '/rnd', label: 'R&D' },
+  { href: '/scenarios', label: 'Scenarios' },
+  { href: '/steps', label: 'Course Roadmap' },
   { href: '/export', label: 'Export' },
   { href: '/model', label: 'Model' }
 ];

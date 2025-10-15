@@ -3,7 +3,7 @@ import Link from 'next/link';
 const steps = [
   { week: 'Week 1', title: 'Orientation & Context', href: '/' },
   { week: 'Week 2', title: 'Systems Mapping', href: '/stakeholders' },
-  { week: 'Week 3', title: 'MCDA Foundations', href: '/stakeholders' },
+  { week: 'Week 3', title: 'MCDA Foundations', href: '/metrics' },
   { week: 'Week 4', title: '2×2 Design Exploration', href: '/design' },
   { week: 'Week 5', title: 'Feasibility Extensions', href: '/design' },
   { week: 'Week 6', title: 'Ethics & Reflection', href: '/ethics' },
