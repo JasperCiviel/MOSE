@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540">
+  <defs>
+    <linearGradient id="lagoon" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#bae6fd"/>
+      <stop offset="1" stop-color="#22d3ee"/>
+    </linearGradient>
+  </defs>
+  <rect width="960" height="540" fill="url(#lagoon)"/>
+  <g transform="translate(120 120)">
+    <rect width="720" height="220" rx="24" fill="#0f172a" opacity="0.18"/>
+    <rect x="40" y="40" width="640" height="180" rx="18" fill="#facc15" stroke="#f59e0b" stroke-width="10"/>
+    <rect x="100" y="86" width="520" height="32" rx="12" fill="#fde047" opacity="0.7"/>
+    <rect x="80" y="138" width="560" height="44" rx="10" fill="#f59e0b" opacity="0.5"/>
+    <path d="M120,232 v70 h480 v-70" fill="#475569"/>
+    <rect x="280" y="212" width="160" height="36" rx="6" fill="#0f172a" opacity="0.45"/>
+  </g>
+  <g font-family="Helvetica, Arial, sans-serif" fill="#0f172a" font-size="18">
+    <text x="140" y="340" font-weight="600">Hollow gate body</text>
+    <text x="140" y="368">Flooded with seawater when stowed</text>
+    <text x="140" y="396">Pressurised air expels water to raise gate</text>
+
+    <text x="520" y="360" font-weight="600">Concrete housing</text>
+    <text x="520" y="388">Contains hinge, power, and control systems</text>
+  </g>
+  <text x="140" y="92" font-family="Helvetica, Arial, sans-serif" font-size="30" font-weight="600" fill="#1e293b">
+    MOSE gate — simplified cross section
+  </text>
+</svg>

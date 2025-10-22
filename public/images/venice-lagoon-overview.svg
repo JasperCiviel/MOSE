@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540">
+  <defs>
+    <linearGradient id="lagoon-water" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#0ea5e9"/>
+      <stop offset="1" stop-color="#0284c7"/>
+    </linearGradient>
+    <linearGradient id="sky-backdrop" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#bfdbfe"/>
+      <stop offset="1" stop-color="#dbeafe"/>
+    </linearGradient>
+  </defs>
+  <rect width="960" height="540" fill="url(#sky-backdrop)"/>
+  <g transform="translate(80 80)">
+    <rect width="800" height="380" rx="40" fill="#e0f2fe" stroke="#bfdbfe" stroke-width="4"/>
+    <path d="M80 320 C120 260 180 220 240 240 C320 260 360 200 420 160 C520 100 640 120 720 200 L720 320 Z"
+          fill="url(#lagoon-water)" opacity="0.85"/>
+    <path d="M80 320 C140 268 220 260 300 280 C380 300 480 300 560 260 C620 232 700 240 720 260 L720 320 Z"
+          fill="#0f172a" opacity="0.05"/>
+    <circle cx="680" cy="180" r="44" fill="#fb923c" opacity="0.35"/>
+    <circle cx="520" cy="150" r="34" fill="#34d399" opacity="0.4"/>
+  </g>
+  <g font-family="Helvetica, Arial, sans-serif" fill="#0f172a">
+    <text x="120" y="120" font-size="28" font-weight="600">Venetian Lagoon overview</text>
+    <text x="120" y="156" font-size="18">Lagoon inlets</text>
+    <line x1="160" y1="162" x2="240" y2="182" stroke="#0f172a" stroke-width="2" stroke-dasharray="6 8"/>
+    <circle cx="240" cy="182" r="8" fill="#facc15" stroke="#0f172a" stroke-width="2"/>
+    <text x="260" y="190" font-size="16">Chioggia gates</text>
+
+    <line x1="400" y1="162" x2="460" y2="190" stroke="#0f172a" stroke-width="2" stroke-dasharray="6 8"/>
+    <circle cx="460" cy="190" r="8" fill="#facc15" stroke="#0f172a" stroke-width="2"/>
+    <text x="480" y="200" font-size="16">Malamocco gates</text>
+
+    <line x1="620" y1="162" x2="680" y2="208" stroke="#0f172a" stroke-width="2" stroke-dasharray="6 8"/>
+    <circle cx="680" cy="208" r="8" fill="#facc15" stroke="#0f172a" stroke-width="2"/>
+    <text x="700" y="220" font-size="16">Lido gates</text>
+  </g>
+  <text x="120" y="420" font-family="Helvetica, Arial, sans-serif" font-size="18" fill="#1f2937">
+    MOSE protects 118 islands, tidal marshes, and the navigation channels linking Venice to the Adriatic Sea.
+  </text>
+</svg>

@@ -10,6 +10,7 @@ const navItems = [
   { href: '/stakeholders', label: 'Stakeholders' },
   { href: '/design', label: 'Design' },
   { href: '/metrics', label: 'Metrics' },
+  { href: '/tetra', label: 'Tetra' },
   { href: '/opt', label: 'Optimization' },
   { href: '/scenarios', label: 'Scenarios' },
   { href: '/ethics', label: 'Ethics' },

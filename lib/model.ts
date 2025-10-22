@@ -30,15 +30,6 @@ export const defaultScenario: ScenarioSettings = {
   maintenanceBudget: 1
 };
 
-export const coeffs = {
-  initial_cost: { base: 180, perMeter: 0.95, heightFactor: 150, timeFactor: 40 },
-  maintenance_cost: { base: 0.45, lengthFactor: 0.0006, heightFactor: 0.5, timeFactor: 0.08 },
-  sight: { base: 1.2, heightFactor: 0.22, lengthPenalty: 0.018, timePenalty: 0.04 },
-  accessibility: { base: 0.4, timeFactor: 0.9, heightPenalty: 0.15 },
-  water_quality: { base: 220, lengthFactor: 0.5, heightPenalty: 30, timeBenefit: 25 },
-  overtopping_risk: { base: 0.22, heightExponent: 1.4, timeRelief: 3.0 }
-};
-
 export const objectiveColors: Record<ObjectiveKey, string> = {
   initial_cost: '#0f60db',
   maintenance_cost: '#1f7dff',
@@ -60,59 +51,49 @@ export function clampToObjective(key: ObjectiveKey, value: number) {
   return Math.min(Math.max(value, min), max);
 }
 
-export function computeMetrics(design: DesignVector, scenario: ScenarioSettings = defaultScenario): Metrics {
+export function computeMetrics(design: DesignVector, _scenario: ScenarioSettings = defaultScenario): Metrics {
   const { constants } = defaultConfig;
-  const lengthRatio = design.x1 / constants.TOTAL_LENGTH;
-  const seaPressure = 1 + scenario.seaLevelRise * 0.4;
-  const stormFactor = scenario.storminess;
-  const maintenanceFactor = scenario.maintenanceBudget;
+  const { x1, x2, x3 } = design;
+  const totalLength = constants.TOTAL_LENGTH;
+  const minClosing = Math.max(x3, constants.MIN_CLOSING_TIME);
 
-  const metrics: Metrics = {
-    initial_cost: clampToObjective(
-      'initial_cost',
-      coeffs.initial_cost.base +
-        coeffs.initial_cost.perMeter * design.x1 * seaPressure +
-        coeffs.initial_cost.heightFactor * Math.pow(design.x2, 1.6) +
-        coeffs.initial_cost.timeFactor * Math.pow(Math.max(design.x3, constants.MIN_CLOSING_TIME), 1.2)
-    ),
-    maintenance_cost: clampToObjective(
-      'maintenance_cost',
-      (coeffs.maintenance_cost.base +
-        coeffs.maintenance_cost.lengthFactor * design.x1 * stormFactor +
-        coeffs.maintenance_cost.heightFactor * Math.pow(design.x2, 1.4) +
-        coeffs.maintenance_cost.timeFactor * Math.pow(design.x3, 1.15)) /
-        Math.max(maintenanceFactor, 0.2)
-    ),
-    sight: clampToObjective(
-      'sight',
-      coeffs.sight.base +
-        coeffs.sight.heightFactor * Math.pow(design.x2, 0.9) -
-        coeffs.sight.lengthPenalty * Math.pow(lengthRatio, 1.1) -
-        coeffs.sight.timePenalty * Math.pow(design.x3, 0.7)
-    ),
-    accessibility: clampToObjective(
-      'accessibility',
-      coeffs.accessibility.base +
-        coeffs.accessibility.timeFactor * Math.pow(design.x3, 0.85) -
-        coeffs.accessibility.heightPenalty * Math.pow(design.x2, 1.1)
-    ),
-    water_quality: clampToObjective(
-      'water_quality',
-      coeffs.water_quality.base +
-        coeffs.water_quality.lengthFactor * design.x1 * seaPressure -
-        coeffs.water_quality.heightPenalty * Math.pow(design.x2, 1.35) +
-        coeffs.water_quality.timeBenefit * Math.pow(design.x3, 1.1)
-    ),
-    overtopping_risk: clampToObjective(
-      'overtopping_risk',
-      coeffs.overtopping_risk.base +
-        2.2 / Math.pow(Math.max(design.x2, 0.1), coeffs.overtopping_risk.heightExponent) * stormFactor +
-        coeffs.overtopping_risk.timeRelief /
-          Math.pow(Math.max(design.x3, constants.MIN_CLOSING_TIME), 1.3)
-    )
+  const movableCostPerMeter =
+    5.2e5 + 4.8e4 * Math.pow(x2, 1.5) + 2.2e5 / minClosing;
+  const permanentCostPerMeter = 1.8e4 + 5.5e3 * Math.pow(x2, 1.1);
+  const initialCost =
+    Math.max(0, x1) * movableCostPerMeter +
+    Math.max(0, totalLength - x1) * permanentCostPerMeter;
+
+  const movableMaintenancePerMeter =
+    1.25e6 + 4.8e5 * x2 + 1.5e6 / Math.pow(minClosing, 1.2);
+  const fixedMaintenancePerMeter = 8.5e4 + 2.2e4 * x2;
+  const maintenanceCost =
+    Math.max(0, x1) * movableMaintenancePerMeter * 180 +
+    Math.max(0, totalLength - x1) * fixedMaintenancePerMeter * 55;
+
+  const movableFraction = totalLength === 0 ? 0 : Math.max(0, Math.min(1, x1 / totalLength));
+  const fixedFraction = 1 - movableFraction;
+
+  const sightScore =
+    movableFraction * 10 +
+    fixedFraction * 10 / Math.max(x2, 1e-6);
+
+  const accessibilityScore =
+    movableFraction * 10 - (10 / 7) * x3;
+
+  const waterQualityScore =
+    movableFraction * 10 - (10 / 24) * x3;
+
+  const overtoppingRisk = 0.65 * Math.exp(-0.35 * (x2 - 1));
+
+  return {
+    initial_cost: clampToObjective('initial_cost', initialCost),
+    maintenance_cost: clampToObjective('maintenance_cost', maintenanceCost),
+    sight: clampToObjective('sight', sightScore),
+    accessibility: clampToObjective('accessibility', accessibilityScore),
+    water_quality: clampToObjective('water_quality', waterQualityScore),
+    overtopping_risk: clampToObjective('overtopping_risk', overtoppingRisk)
   };
-
-  return metrics;
 }
 
 export function buildPreferenceFunctions(knots = defaultConfig.knots) {
@@ -159,13 +140,6 @@ export function aggregatePreferences(
     overall = Math.pow(weighted.reduce((acc, value) => acc + value, 0), 1 / 3) * 100;
   }
   return { overall, stakeholder: stakeholderScores };
-}
-
-export interface GARunConfig {
-  iterations: number;
-  popSize: number;
-  crossover: number;
-  stallLimit: number;
 }
 
 export interface GAHistoryRecord {

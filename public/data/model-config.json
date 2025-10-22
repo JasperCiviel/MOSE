@@ -1,30 +1,69 @@
 {
-  "constants": { "TOTAL_LENGTH": 12000, "MIN_CLOSING_TIME": 0.1 },
+  "constants": { "TOTAL_LENGTH": 1600, "MIN_CLOSING_TIME": 0.001 },
   "bounds": {
-    "x1": { "min": 100, "max": 5000, "step": 10, "unit": "m" },
-    "x2": { "min": 0.5, "max": 3.0, "step": 0.05, "unit": "-" },
-    "x3": { "min": 0.1, "max": 6.0, "step": 0.05, "unit": "h" }
+    "x1": { "min": 0, "max": 1600, "step": 10, "unit": "m" },
+    "x2": { "min": 1, "max": 10, "step": 0.1, "unit": "m" },
+    "x3": { "min": 0.5, "max": 5, "step": 0.1, "unit": "h" }
   },
   "OBJECTIVE_KEYS": ["initial_cost","maintenance_cost","sight","accessibility","water_quality","overtopping_risk"],
   "STAKEHOLDER_DATA": [
     {
-      "name": "Residents",
-      "influence": 0.30,
-      "weights": { "initial_cost": 0.10,"maintenance_cost": 0.10,"sight": 0.20,"accessibility": 0.20,"water_quality": 0.30,"overtopping_risk": 0.10 }
+      "name": "Municipality",
+      "influence": 0.5,
+      "weights": {
+        "initial_cost": 0.4,
+        "maintenance_cost": 0.25,
+        "sight": 0.05,
+        "accessibility": 0.1,
+        "water_quality": 0.1,
+        "overtopping_risk": 0.1
+      }
     },
-    { "name": "Local Government", "influence": 0.25, "weights": { "initial_cost": 0.25,"maintenance_cost": 0.25,"sight": 0.10,"accessibility": 0.15,"water_quality": 0.10,"overtopping_risk": 0.15 } },
-    { "name": "Shipping", "influence": 0.20, "weights": { "initial_cost": 0.10,"maintenance_cost": 0.10,"sight": 0.05,"accessibility": 0.45,"water_quality": 0.05,"overtopping_risk": 0.25 } },
-    { "name": "Environmental NGO", "influence": 0.15, "weights": { "initial_cost": 0.05,"maintenance_cost": 0.05,"sight": 0.10,"accessibility": 0.05,"water_quality": 0.55,"overtopping_risk": 0.20 } },
-    { "name": "Tourism", "influence": 0.10, "weights": { "initial_cost": 0.05,"maintenance_cost": 0.05,"sight": 0.35,"accessibility": 0.25,"water_quality": 0.20,"overtopping_risk": 0.10 } }
+    {
+      "name": "Residents",
+      "influence": 0.2,
+      "weights": {
+        "initial_cost": 0.1,
+        "maintenance_cost": 0.1,
+        "sight": 0.25,
+        "accessibility": 0.2,
+        "water_quality": 0.25,
+        "overtopping_risk": 0.1
+      }
+    },
+    {
+      "name": "Environmental Agency",
+      "influence": 0.1,
+      "weights": {
+        "initial_cost": 0.05,
+        "maintenance_cost": 0.05,
+        "sight": 0.1,
+        "accessibility": 0.1,
+        "water_quality": 0.55,
+        "overtopping_risk": 0.15
+      }
+    },
+    {
+      "name": "Shipping Companies",
+      "influence": 0.15,
+      "weights": {
+        "initial_cost": 0.1,
+        "maintenance_cost": 0.1,
+        "sight": 0.3,
+        "accessibility": 0.2,
+        "water_quality": 0.2,
+        "overtopping_risk": 0.1
+      }
+    }
   ],
   "knots": {
-    "initial_cost": { "x": [100, 1000, 2500, 5000], "y": [100, 60, 30, 0] },
-    "maintenance_cost": { "x": [0.5, 1.5, 2.5, 3.0], "y": [100, 70, 30, 0] },
-    "sight": { "x": [0.5, 1.0, 2.0, 3.0], "y": [20, 60, 85, 90] },
-    "accessibility": { "x": [0.1, 1.0, 3.0, 6.0], "y": [90, 80, 40, 20] },
-    "water_quality": { "x": [100, 1000, 2500, 5000], "y": [40, 60, 80, 90] },
-    "overtopping_risk": { "x": [0.1, 0.5, 1.5, 3.0], "y": [100, 90, 40, 10] }
+    "initial_cost": { "x": [500000000, 1000000000, 2000000000, 3500000000, 8000000000], "y": [100, 95, 90, 30, 0] },
+    "maintenance_cost": { "x": [10000000000, 100000000000, 1500000000000], "y": [100, 40, 0] },
+    "sight": { "x": [0, 5, 10], "y": [0, 50, 100] },
+    "accessibility": { "x": [0, 5, 10], "y": [0, 50, 100] },
+    "water_quality": { "x": [0, 5, 10], "y": [0, 50, 100] },
+    "overtopping_risk": { "x": [0, 0.15, 0.3, 0.45, 0.6], "y": [100, 85, 60, 25, 0] }
   },
-  "options": { "popSize": 100, "iterations": 200, "crossover": 0.8, "stallLimit": 30, "encoding": "real" },
+  "options": { "popSize": 600, "iterations": 500, "crossover": 0.8, "stallLimit": 10, "encoding": "real", "bits": 10 },
   "paradigms": ["minmax", "tetra"]
 }

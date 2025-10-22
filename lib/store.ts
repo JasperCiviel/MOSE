@@ -8,7 +8,6 @@ import {
   computeMetrics,
   defaultScenario,
   GAHistoryRecord,
-  GARunConfig,
   Metrics,
   Preferences,
   ScenarioSettings,
@@ -16,6 +15,7 @@ import {
   normalizeStakeholders,
   type DesignVector
 } from './model';
+import { runGeneticAlgorithm } from './ga';
 
 interface StoreState {
   config: typeof defaultConfig;
@@ -42,6 +42,7 @@ interface StoreState {
   pinDesign: (record: GAHistoryRecord) => void;
   unpinDesign: (index: number) => void;
   importConfig: (config: typeof defaultConfig) => void;
+  setStakeholderInfluences: (values: number[]) => void;
   updateStakeholderInfluence: (index: number, value: number) => void;
   updateStakeholderObjectiveWeight: (stakeholderIndex: number, objectiveIndex: number, value: number) => void;
 }
@@ -129,43 +130,33 @@ export const useMoseStore = create<StoreState>((set, get) => ({
   },
   runGA: (paradigm) => {
     if (typeof window === 'undefined') return;
-    const state = get();
-    if (state.gaProgress && state.gaProgress.paradigm === paradigm) {
+    const { gaProgress } = get();
+    if (gaProgress && gaProgress.paradigm === paradigm) {
       return;
     }
 
-    const worker = new Worker(new URL('./workers/gaWorker.ts', import.meta.url));
-    const options: GARunConfig = {
-      iterations: state.config.options.iterations,
-      popSize: state.config.options.popSize,
-      crossover: state.config.options.crossover,
-      stallLimit: state.config.options.stallLimit
-    };
+    set({ gaProgress: { iteration: -1, best: 0, paradigm } });
 
-    worker.postMessage({
-      paradigm,
-      options,
-      bounds: state.config.bounds,
-      scenario: state.scenario,
-      prefFnsData: state.config.knots,
-      stakeholderWeights: state.stakeholderWeights,
-      stakeholderObjectiveWeights: state.stakeholderObjectiveWeights
-    });
+    setTimeout(() => {
+      const state = get();
+      const { popSize, iterations, crossover, stallLimit } = state.config.options;
+      const result = runGeneticAlgorithm({
+        paradigm,
+        options: { popSize, iterations, crossover, stallLimit },
+        bounds: state.config.bounds,
+        prefFns: state.prefFns,
+        stakeholderWeights: state.stakeholderWeights,
+        stakeholderObjectiveWeights: state.stakeholderObjectiveWeights
+      });
 
-    worker.onmessage = (event) => {
-      const { type, payload } = event.data;
-      if (type === 'progress') {
-        set({ gaProgress: { iteration: payload.iteration, best: payload.best.overall, paradigm } });
-      }
-      if (type === 'result') {
-        const record = payload as GAHistoryRecord;
-        set((s) => ({
-          history: { ...s.history, [paradigm]: [...s.history[paradigm], record] },
-          gaProgress: null
-        }));
-        worker.terminate();
-      }
-    };
+      set((s) => ({
+        history: {
+          ...s.history,
+          [paradigm]: [...s.history[paradigm], result]
+        },
+        gaProgress: null
+      }));
+    }, 0);
   },
   pinDesign: (record) =>
     set((state) => ({ pinned: state.pinned.find((r) => r.iteration === record.iteration && r.paradigm === record.paradigm)
@@ -201,9 +192,25 @@ export const useMoseStore = create<StoreState>((set, get) => ({
       history: { minmax: [], tetra: [] }
     });
   },
+  setStakeholderInfluences: (values) => {
+    set((state) => {
+      if (!Array.isArray(values) || values.length !== state.stakeholderRawInfluence.length) {
+        return {};
+      }
+      const sanitized = values.map((val) => Math.max(0.0001, val));
+      const normalizedValues = renormalize(sanitized, state.stakeholderRawObjectiveWeights);
+      return {
+        stakeholderRawInfluence: sanitized,
+        stakeholderWeights: normalizedValues.weights,
+        stakeholderObjectiveWeights: normalizedValues.objectives
+      };
+    });
+  },
   updateStakeholderInfluence: (index, value) => {
     set((state) => {
-      const stakeholderRawInfluence = state.stakeholderRawInfluence.map((val, idx) => (idx === index ? value : val));
+      const stakeholderRawInfluence = state.stakeholderRawInfluence.map((val, idx) =>
+        idx === index ? Math.max(0.0001, value) : val
+      );
       const normalizedValues = renormalize(stakeholderRawInfluence, state.stakeholderRawObjectiveWeights);
       return {
         stakeholderRawInfluence,
